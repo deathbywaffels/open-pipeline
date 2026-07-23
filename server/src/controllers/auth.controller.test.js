@@ -56,6 +56,30 @@ describe("auth", () => {
     await cleanupByEmail(creds.email);
   });
 
+  it("creates an Organization for a new Employer account, but not for a Candidate", async () => {
+    const employerCreds = uniqueUser({ role: "EMPLOYER", name: "Acme Inc" });
+    const employerRes = await request(app)
+      .post("/api/auth/register")
+      .send(employerCreds);
+    const org = await prisma.organization.findUnique({
+      where: { userId: employerRes.body.id },
+    });
+    expect(org).not.toBeNull();
+    expect(org.name).toBe("Acme Inc");
+
+    const candidateCreds = uniqueUser();
+    const candidateRes = await request(app)
+      .post("/api/auth/register")
+      .send(candidateCreds);
+    const noOrg = await prisma.organization.findUnique({
+      where: { userId: candidateRes.body.id },
+    });
+    expect(noOrg).toBeNull();
+
+    await cleanupByEmail(employerCreds.email);
+    await cleanupByEmail(candidateCreds.email);
+  });
+
   it("rejects registration with missing fields", async () => {
     const res = await request(app)
       .post("/api/auth/register")

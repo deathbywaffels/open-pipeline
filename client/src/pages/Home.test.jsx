@@ -150,7 +150,7 @@ describe("Home", () => {
     expect(screen.queryByText("Sponsors")).not.toBeInTheDocument();
   });
 
-  it("shows the employer placeholder instead of candidate tiles for an Employer account", async () => {
+  it("shows Postings/Candidates tiles instead of candidate tiles for an Employer account", async () => {
     mockRole = "EMPLOYER";
     globalThis.fetch = vi.fn((url) => {
       if (url === "/api/health") {
@@ -168,9 +168,8 @@ describe("Home", () => {
       </MemoryRouter>,
     );
 
-    expect(
-      await screen.findByText(/employer tools are coming soon/i),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Postings")).toBeInTheDocument();
+    expect(screen.getByText("Candidates")).toBeInTheDocument();
     expect(screen.queryByText("Jobs")).not.toBeInTheDocument();
     expect(screen.queryByText(/jobs waiting for you/i)).not.toBeInTheDocument();
   });

@@ -67,11 +67,18 @@ out of scope.
 - ✅ **Phase 0 — done.** Repo bootstrap, candidate-side feature set
   carried over intact (see below), `role` + `isPublic` on `User`,
   registration role picker, minimal Employer placeholder Home page.
-- ⏳ **Phase 1 — next.** Employer core: `Organization` entity,
-  `JobPosting` model, Employer board (kanban, mirrors the candidate
-  Application board).
-- Public/private marketplace toggle enforcement + candidate discovery for
-  employers (skill/location matching, AI recommendations).
+- ✅ **Phase 1 — done.** Employer core: `Organization` entity (auto-
+  created at registration), `JobPosting` model (paste-based, mirrors
+  `JobListing`), `CandidateLead` + `CandidateLeadStageEvent` (manually-
+  entered leads against a posting — no discovery yet, so leads are added
+  directly rather than sourced), Employer kanban board at `/candidates`
+  mirroring the candidate Application board, postings management at
+  `/postings`. Both pages guarded so only Employer accounts can reach
+  them.
+- ⏳ **Phase 2 — next.** Public/private marketplace toggle enforcement +
+  candidate discovery for employers (skill/location matching, AI
+  recommendations) — this is what turns `CandidateLead`s from
+  manually-entered into sourced from real discovered Candidates.
 - Freeze/cold (login-streak) + posting-freshness (weekly reconfirm,
   badge-then-30-day-hide) mechanics, both roles.
 - Candidate Profile visibility, CV request/approve flow, "hide from

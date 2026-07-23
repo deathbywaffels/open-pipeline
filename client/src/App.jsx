@@ -13,6 +13,8 @@ import Map from "./pages/Map.jsx";
 import Settings from "./pages/Settings.jsx";
 import SponsorCompanies from "./pages/SponsorCompanies.jsx";
 import Coach from "./pages/Coach.jsx";
+import Postings from "./pages/Postings.jsx";
+import EmployerBoard from "./pages/EmployerBoard.jsx";
 
 function App() {
   return (
@@ -98,6 +100,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <Coach />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/postings"
+            element={
+              <ProtectedRoute>
+                <Postings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/candidates"
+            element={
+              <ProtectedRoute>
+                <EmployerBoard />
               </ProtectedRoute>
             }
           />

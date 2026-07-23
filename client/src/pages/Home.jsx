@@ -9,7 +9,8 @@ import {
   Settings as SettingsIcon,
   ShieldCheck,
   Compass,
-  Building2,
+  ClipboardList,
+  Users,
   LogOut,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -79,28 +80,22 @@ const TILES = [
   },
 ];
 
-function EmployerPlaceholder() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: "easeOut" }}
-      className="mt-10 flex flex-col items-center gap-3 rounded-3xl border border-dashed border-slate-200 bg-white p-10 text-center"
-    >
-      <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-100 text-brand-600">
-        <Building2 className="h-7 w-7" />
-      </span>
-      <h2 className="text-lg font-extrabold text-slate-800">
-        Employer tools are coming soon
-      </h2>
-      <p className="max-w-md text-sm text-slate-500">
-        You're registered as an employer. Posting jobs, building your candidate
-        pipeline, and AI-recommended matches are being built next — check back
-        soon.
-      </p>
-    </motion.div>
-  );
-}
+const EMPLOYER_TILES = [
+  {
+    to: "/postings",
+    icon: ClipboardList,
+    label: "Postings",
+    description: "Post & manage job postings",
+    color: "brand",
+  },
+  {
+    to: "/candidates",
+    icon: Users,
+    label: "Candidates",
+    description: "Track candidates through your pipeline",
+    color: "accent",
+  },
+];
 
 export default function Home() {
   const { user, logout } = useAuth();
@@ -144,7 +139,11 @@ export default function Home() {
       </div>
 
       {isEmployer ? (
-        <EmployerPlaceholder />
+        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3">
+          {EMPLOYER_TILES.map((tile, i) => (
+            <FlipTile key={tile.to} {...tile} index={i} />
+          ))}
+        </div>
       ) : (
         <>
           <div className="mt-6 flex flex-col gap-4 md:flex-row">

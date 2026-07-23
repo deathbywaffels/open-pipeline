@@ -8,7 +8,9 @@ const VALID_ROLES = ["CANDIDATE", "EMPLOYER"];
  * POST /api/auth/register
  * Creates a new user account and logs them in (sets req.session.userId).
  * role is fixed at registration — there's no dual-role or role-switching
- * in v1, per SPEC.md.
+ * in v1, per SPEC.md. An EMPLOYER registration also creates their
+ * Organization row in the same transaction, so every Employer account
+ * has exactly one Organization from the moment they sign up.
  *
  * Inputs: body { email: string, password: string, name: string, role: "CANDIDATE" | "EMPLOYER" }
  * Response: 201 { id, email, name, role, needsSponsorship, commuteRadiusKm }
@@ -34,8 +36,16 @@ export async function register(req, res) {
   }
 
   const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-  const user = await prisma.user.create({
-    data: { email, passwordHash, name, role },
+  const user = await prisma.$transaction(async (tx) => {
+    const created = await tx.user.create({
+      data: { email, passwordHash, name, role },
+    });
+    if (role === "EMPLOYER") {
+      await tx.organization.create({
+        data: { userId: created.id, name: created.name },
+      });
+    }
+    return created;
   });
 
   req.session.userId = user.id;

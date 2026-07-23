@@ -21,6 +21,8 @@ import sponsorCompanyRoutes from "./routes/sponsorCompany.routes.js";
 import desiredLocationRoutes from "./routes/desiredLocation.routes.js";
 import coachingRoutes from "./routes/coaching.routes.js";
 import companyFitRoutes from "./routes/companyFit.routes.js";
+import jobPostingRoutes from "./routes/jobPosting.routes.js";
+import candidateLeadRoutes from "./routes/candidateLead.routes.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 
 const CLIENT_DIST = path.resolve(process.cwd(), "../client/dist");
@@ -95,6 +97,8 @@ export function createApp() {
   app.use("/api/desired-locations", desiredLocationRoutes);
   app.use("/api/coaching", coachingRoutes);
   app.use("/api/company-fit", companyFitRoutes);
+  app.use("/api/job-postings", jobPostingRoutes);
+  app.use("/api/candidate-leads", candidateLeadRoutes);
   app.use("/api", notFoundHandler);
 
   // Serves the built client (npm run build) so one process/origin handles
