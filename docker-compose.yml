@@ -1,0 +1,26 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: openpipeline
+      POSTGRES_USER: openpipeline
+      POSTGRES_PASSWORD: openpipeline
+      # Local dev only, localhost-bound throwaway data. trust auth (no
+      # password handshake) sidesteps a confirmed Jest --experimental-vm-
+      # modules incompatibility with pg's SCRAM/SASL implementation
+      # ("SASL: SCRAM-SERVER-FIRST-MESSAGE: client password must be a
+      # string" on every query, reproduced in isolation outside Express/
+      # Supertest — a real Jest-VM-modules bug, not an app bug). Production
+      # (Neon) is unaffected: it's never accessed from inside Jest, only
+      # from the plain `node` process running the real server.
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      # 5433, not 5432 — the sibling "Agentic coding" project's own
+      # Postgres container already binds 5432 on this machine.
+      - "5433:5432"
+    volumes:
+      - openpipeline-db-data:/var/lib/postgresql/data
+
+volumes:
+  openpipeline-db-data:

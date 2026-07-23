@@ -1,0 +1,204 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AccountRole {
+  CANDIDATE
+  EMPLOYER
+}
+
+model User {
+  id                  Int         @id @default(autoincrement())
+  email               String      @unique
+  passwordHash        String
+  name                String
+  role                AccountRole @default(CANDIDATE)
+  isPublic            Boolean     @default(false)
+  dailyQuestTarget    Int         @default(3)
+  dailyPasteTarget    Int         @default(2)
+  dailyReachOutTarget Int         @default(1)
+  lastActiveAt        DateTime?
+  needsSponsorship    Boolean     @default(true)
+  commuteRadiusKm     Int         @default(50)
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  skills           Skill[]
+  jobListings      JobListing[]
+  applications     Application[]
+  dislikeReasons   DislikeReason[]
+  cvs              Cv[]
+  sponsorCompanies SponsorCompany[]
+  desiredLocations DesiredLocation[]
+}
+
+model Skill {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  name      String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+}
+
+enum SwipeStatus {
+  PENDING
+  LIKED
+  DISLIKED
+}
+
+model JobListing {
+  id           Int         @id @default(autoincrement())
+  userId       Int
+  title        String
+  company      String
+  description  String
+  sourceUrl    String
+  source       String      @default("manual")
+  locationText String?
+  latitude     Float?
+  longitude    Float?
+  swipeStatus  SwipeStatus @default(PENDING)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requiredSkills JobRequiredSkill[]
+  dislikeReasons DislikeReason[]
+  application    Application?
+
+  @@index([userId, swipeStatus])
+}
+
+model JobRequiredSkill {
+  id           Int    @id @default(autoincrement())
+  jobListingId Int
+  name         String
+
+  jobListing JobListing @relation(fields: [jobListingId], references: [id], onDelete: Cascade)
+
+  @@unique([jobListingId, name])
+}
+
+model DislikeReason {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  jobListingId Int
+  reason       String
+  createdAt    DateTime @default(now())
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobListing JobListing @relation(fields: [jobListingId], references: [id], onDelete: Cascade)
+}
+
+enum ApplicationStage {
+  LIKED
+  APPLIED
+  PHONE_SCREEN
+  TECHNICAL_INTERVIEW
+  INTERVIEW
+  OFFER
+  REJECTED
+}
+
+model Application {
+  id                Int              @id @default(autoincrement())
+  userId            Int
+  jobListingId      Int              @unique
+  stage             ApplicationStage @default(LIKED)
+  notes             String?
+  appliedAt         DateTime?
+  lastStageChangeAt DateTime         @default(now())
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobListing       JobListing        @relation(fields: [jobListingId], references: [id], onDelete: Cascade)
+  stageEvents      StageEvent[]
+  rejectionLetters RejectionLetter[]
+
+  @@index([userId, stage])
+}
+
+model StageEvent {
+  id            Int               @id @default(autoincrement())
+  applicationId Int
+  fromStage     ApplicationStage?
+  toStage       ApplicationStage
+  occurredAt    DateTime          @default(now())
+  note          String?
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId, occurredAt])
+}
+
+model Cv {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  filename   String
+  storageKey String
+  mimeType   String
+  sizeBytes  Int
+  uploadedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RejectionLetter {
+  id            Int      @id @default(autoincrement())
+  applicationId Int
+  filename      String
+  storageKey    String
+  mimeType      String
+  sizeBytes     Int
+  uploadedAt    DateTime @default(now())
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+}
+
+enum SponsorOutreachStatus {
+  NOT_STARTED
+  RESEARCHING
+  APPLIED
+  REJECTED
+}
+
+model SponsorCompany {
+  id             Int                   @id @default(autoincrement())
+  userId         Int
+  name           String
+  normalizedName String
+  country        String                @default("NL")
+  outreachStatus SponsorOutreachStatus @default(NOT_STARTED)
+  hiresItWorkers Boolean?
+  notes          String?
+  careersUrl     String?
+  lastOutreachAt DateTime?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, normalizedName, country])
+  @@index([userId, country])
+}
+
+model DesiredLocation {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  label     String
+  latitude  Float?
+  longitude Float?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, label])
+}

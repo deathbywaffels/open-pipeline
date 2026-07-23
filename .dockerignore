@@ -1,0 +1,14 @@
+node_modules
+**/node_modules
+.git
+client/dist
+server/dev.db
+server/data
+server/uploads
+**/*.db
+**/*.db-journal
+.env
+**/.env
+coverage
+**/coverage
+.DS_Store
