@@ -6,6 +6,7 @@ import Settings from "./Settings.jsx";
 
 const mockUpdateUser = vi.fn();
 let mockNeedsSponsorship = true;
+let mockIsPublic = false;
 vi.mock("../context/AuthContext.jsx", () => ({
   useAuth: () => ({
     user: {
@@ -13,6 +14,7 @@ vi.mock("../context/AuthContext.jsx", () => ({
       name: "Jane",
       needsSponsorship: mockNeedsSponsorship,
       commuteRadiusKm: 50,
+      isPublic: mockIsPublic,
     },
     updateUser: mockUpdateUser,
   }),
@@ -51,6 +53,7 @@ function mockFetchByUrl({ patchResponse } = {}) {
             dailyReachOutTarget: 1,
             needsSponsorship: true,
             commuteRadiusKm: 50,
+            isPublic: false,
           }),
         },
       );
@@ -67,6 +70,7 @@ describe("Settings", () => {
   beforeEach(() => {
     mockUpdateUser.mockReset();
     mockNeedsSponsorship = true;
+    mockIsPublic = false;
   });
 
   it("hides the reach-out target field when sponsorship is off", async () => {
@@ -126,6 +130,7 @@ describe("Settings", () => {
           dailyReachOutTarget: 1,
           needsSponsorship: true,
           commuteRadiusKm: 50,
+          isPublic: false,
         }),
       },
     });
@@ -152,6 +157,7 @@ describe("Settings", () => {
       dailyReachOutTarget: 1,
       needsSponsorship: true,
       commuteRadiusKm: 50,
+      isPublic: false,
     });
   });
 
@@ -165,6 +171,7 @@ describe("Settings", () => {
           dailyReachOutTarget: 1,
           needsSponsorship: false,
           commuteRadiusKm: 50,
+          isPublic: false,
         }),
       },
     });
@@ -184,10 +191,50 @@ describe("Settings", () => {
       expect(mockUpdateUser).toHaveBeenCalledWith({
         needsSponsorship: false,
         commuteRadiusKm: 50,
+        isPublic: false,
       }),
     );
     const [, options] = patchCall(globalThis.fetch);
     expect(JSON.parse(options.body).needsSponsorship).toBe(false);
+  });
+
+  it("toggles isPublic, saves it, and updates the auth context", async () => {
+    globalThis.fetch = mockFetchByUrl({
+      patchResponse: {
+        ok: true,
+        json: async () => ({
+          dailyQuestTarget: 3,
+          dailyPasteTarget: 2,
+          dailyReachOutTarget: 1,
+          needsSponsorship: true,
+          commuteRadiusKm: 50,
+          isPublic: true,
+        }),
+      },
+    });
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter>
+        <Settings />
+      </MemoryRouter>,
+    );
+
+    await screen.findByLabelText(/daily application quest target/i);
+    await user.click(
+      screen.getByLabelText(/make my profile visible to employers/i),
+    );
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(mockUpdateUser).toHaveBeenCalledWith({
+        needsSponsorship: true,
+        commuteRadiusKm: 50,
+        isPublic: true,
+      }),
+    );
+    const [, options] = patchCall(globalThis.fetch);
+    expect(JSON.parse(options.body).isPublic).toBe(true);
   });
 
   it("shows an error when saving fails", async () => {

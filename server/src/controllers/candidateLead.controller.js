@@ -24,21 +24,26 @@ async function getOrganizationId(userId) {
  * POST /api/candidate-leads
  * Adds a candidate the current Employer is tracking against one of their
  * own job postings, plus its first CandidateLeadStageEvent (SOURCED) —
- * mirrors how liking a job creates a candidate's first StageEvent. There's
- * no discovery/swipe flow yet (Roadmap Phase 3), so leads are entered
- * directly.
+ * mirrors how liking a job creates a candidate's first StageEvent. Either
+ * a manually-typed name, or a candidateUserId sourced from Discovery
+ * (/api/discovery/candidates) — when candidateUserId is given, the lead's
+ * name always comes from that account's current name (any client-supplied
+ * name is ignored), and the account must be a public Candidate.
  *
- * Inputs: body { name: string, jobPostingId: number, notes?: string }
+ * Inputs: body {
+ *   jobPostingId: number, name?: string, candidateUserId?: number, notes?: string
+ * }
  * Response: 201 CandidateLead & { jobPosting: { id, title } }
- *   | 400 (missing name/jobPostingId) | 404 (jobPostingId not owned by this Employer)
+ *   | 400 (missing jobPostingId, or neither name nor candidateUserId given)
+ *   | 404 (jobPostingId not owned by this Employer, or candidateUserId isn't a public Candidate)
  */
 export async function createCandidateLead(req, res) {
-  const { name, jobPostingId, notes } = req.body;
+  const { name, jobPostingId, notes, candidateUserId } = req.body;
 
-  if (!name || !jobPostingId) {
-    return res
-      .status(400)
-      .json({ error: "name and jobPostingId are required" });
+  if ((!name && !candidateUserId) || !jobPostingId) {
+    return res.status(400).json({
+      error: "jobPostingId and either name or candidateUserId are required",
+    });
   }
 
   const organizationId = await getOrganizationId(req.session.userId);
@@ -51,11 +56,29 @@ export async function createCandidateLead(req, res) {
     return res.status(404).json({ error: "Job posting not found" });
   }
 
+  let leadName = name;
+  let resolvedCandidateUserId = null;
+  if (candidateUserId) {
+    const candidateUser = await prisma.user.findUnique({
+      where: { id: Number(candidateUserId) },
+    });
+    if (
+      !candidateUser ||
+      candidateUser.role !== "CANDIDATE" ||
+      !candidateUser.isPublic
+    ) {
+      return res.status(404).json({ error: "Candidate not found" });
+    }
+    leadName = candidateUser.name;
+    resolvedCandidateUserId = candidateUser.id;
+  }
+
   const candidateLead = await prisma.candidateLead.create({
     data: {
       organizationId,
       jobPostingId: jobPosting.id,
-      name,
+      candidateUserId: resolvedCandidateUserId,
+      name: leadName,
       notes: notes || null,
       stage: "SOURCED",
       stageEvents: { create: { toStage: "SOURCED" } },

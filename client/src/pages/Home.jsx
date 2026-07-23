@@ -11,6 +11,7 @@ import {
   Compass,
   ClipboardList,
   Users,
+  Sparkles,
   LogOut,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -94,6 +95,13 @@ const EMPLOYER_TILES = [
     label: "Candidates",
     description: "Track candidates through your pipeline",
     color: "accent",
+  },
+  {
+    to: "/discovery",
+    icon: Sparkles,
+    label: "Discover",
+    description: "Find candidates matching your postings",
+    color: "brand",
   },
 ];
 

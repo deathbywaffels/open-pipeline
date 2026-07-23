@@ -38,6 +38,8 @@ describe("auth", () => {
     // defaults true so existing sponsor-flagging behavior is unchanged
     // for anyone who hasn't explicitly opted out
     expect(registerRes.body.needsSponsorship).toBe(true);
+    // defaults false — not discoverable until explicitly opted in
+    expect(registerRes.body.isPublic).toBe(false);
 
     const meRes = await agent.get("/api/auth/me");
     expect(meRes.status).toBe(200);

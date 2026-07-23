@@ -37,13 +37,11 @@ describe("candidate leads", () => {
       const { agent, userId } = await registerEmployer(app);
       const jobPostingId = await createPosting(agent);
 
-      const res = await agent
-        .post("/api/candidate-leads")
-        .send({
-          name: "Jane Dev",
-          jobPostingId,
-          notes: "Strong React background",
-        });
+      const res = await agent.post("/api/candidate-leads").send({
+        name: "Jane Dev",
+        jobPostingId,
+        notes: "Strong React background",
+      });
 
       expect(res.status).toBe(201);
       expect(res.body.name).toBe("Jane Dev");
@@ -84,6 +82,77 @@ describe("candidate leads", () => {
         .post("/api/candidate-leads")
         .send({ name: "Jane Dev", jobPostingId });
       expect(res.status).toBe(404);
+    });
+
+    it("400s when neither name nor candidateUserId is given", async () => {
+      const { agent } = await registerEmployer(app);
+      const jobPostingId = await createPosting(agent);
+
+      const res = await agent
+        .post("/api/candidate-leads")
+        .send({ jobPostingId });
+      expect(res.status).toBe(400);
+    });
+
+    describe("candidateUserId (sourced from Discovery)", () => {
+      it("derives the name from the real account, ignoring any client-supplied name", async () => {
+        const { agent } = await registerEmployer(app);
+        const jobPostingId = await createPosting(agent);
+        const candidate = await registerAndLogin(app, {
+          name: "Real Candidate Name",
+        });
+        await candidate.agent
+          .patch("/api/user/settings")
+          .send({ isPublic: true });
+
+        const res = await agent.post("/api/candidate-leads").send({
+          jobPostingId,
+          candidateUserId: candidate.userId,
+          name: "Ignored Name",
+        });
+
+        expect(res.status).toBe(201);
+        expect(res.body.name).toBe("Real Candidate Name");
+        expect(res.body.candidateUserId).toBe(candidate.userId);
+      });
+
+      it("404s for a private candidate", async () => {
+        const { agent } = await registerEmployer(app);
+        const jobPostingId = await createPosting(agent);
+        const candidate = await registerAndLogin(app); // isPublic defaults false
+
+        const res = await agent.post("/api/candidate-leads").send({
+          jobPostingId,
+          candidateUserId: candidate.userId,
+        });
+        expect(res.status).toBe(404);
+      });
+
+      it("404s for an Employer account (not a Candidate)", async () => {
+        const employerA = await registerEmployer(app);
+        const jobPostingId = await createPosting(employerA.agent);
+        const employerB = await registerEmployer(app);
+        await employerB.agent
+          .patch("/api/user/settings")
+          .send({ isPublic: true });
+
+        const res = await employerA.agent.post("/api/candidate-leads").send({
+          jobPostingId,
+          candidateUserId: employerB.userId,
+        });
+        expect(res.status).toBe(404);
+      });
+
+      it("404s for a nonexistent candidateUserId", async () => {
+        const { agent } = await registerEmployer(app);
+        const jobPostingId = await createPosting(agent);
+
+        const res = await agent.post("/api/candidate-leads").send({
+          jobPostingId,
+          candidateUserId: 999999,
+        });
+        expect(res.status).toBe(404);
+      });
     });
   });
 

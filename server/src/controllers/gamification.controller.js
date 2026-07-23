@@ -136,11 +136,11 @@ export async function getStreak(req, res) {
  * Inputs: body {
  *   dailyQuestTarget?: number, dailyPasteTarget?: number,
  *   dailyReachOutTarget?: number, needsSponsorship?: boolean,
- *   commuteRadiusKm?: number
+ *   commuteRadiusKm?: number, isPublic?: boolean
  * }
  * Response: 200 {
  *   dailyQuestTarget, dailyPasteTarget, dailyReachOutTarget,
- *   needsSponsorship, commuteRadiusKm
+ *   needsSponsorship, commuteRadiusKm, isPublic
  * } | 400 (invalid value for a field that was present)
  */
 export async function updateUserSettings(req, res) {
@@ -150,6 +150,7 @@ export async function updateUserSettings(req, res) {
     dailyReachOutTarget,
     needsSponsorship,
     commuteRadiusKm,
+    isPublic,
   } = req.body;
 
   if (
@@ -189,6 +190,9 @@ export async function updateUserSettings(req, res) {
       .status(400)
       .json({ error: "commuteRadiusKm must be a positive integer" });
   }
+  if (isPublic !== undefined && typeof isPublic !== "boolean") {
+    return res.status(400).json({ error: "isPublic must be a boolean" });
+  }
 
   const data = {};
   if (dailyQuestTarget !== undefined) data.dailyQuestTarget = dailyQuestTarget;
@@ -197,6 +201,7 @@ export async function updateUserSettings(req, res) {
     data.dailyReachOutTarget = dailyReachOutTarget;
   if (needsSponsorship !== undefined) data.needsSponsorship = needsSponsorship;
   if (commuteRadiusKm !== undefined) data.commuteRadiusKm = commuteRadiusKm;
+  if (isPublic !== undefined) data.isPublic = isPublic;
 
   const user = await prisma.user.update({
     where: { id: req.session.userId },
@@ -209,5 +214,6 @@ export async function updateUserSettings(req, res) {
     dailyReachOutTarget: user.dailyReachOutTarget,
     needsSponsorship: user.needsSponsorship,
     commuteRadiusKm: user.commuteRadiusKm,
+    isPublic: user.isPublic,
   });
 }

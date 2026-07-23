@@ -13,7 +13,7 @@ const VALID_ROLES = ["CANDIDATE", "EMPLOYER"];
  * has exactly one Organization from the moment they sign up.
  *
  * Inputs: body { email: string, password: string, name: string, role: "CANDIDATE" | "EMPLOYER" }
- * Response: 201 { id, email, name, role, needsSponsorship, commuteRadiusKm }
+ * Response: 201 { id, email, name, role, needsSponsorship, commuteRadiusKm, isPublic }
  *   | 400 (missing fields, or invalid role) | 409 (email taken)
  */
 export async function register(req, res) {
@@ -56,6 +56,7 @@ export async function register(req, res) {
     role: user.role,
     needsSponsorship: user.needsSponsorship,
     commuteRadiusKm: user.commuteRadiusKm,
+    isPublic: user.isPublic,
   });
 }
 
@@ -64,7 +65,7 @@ export async function register(req, res) {
  * Verifies credentials and starts a session.
  *
  * Inputs: body { email: string, password: string }
- * Response: 200 { id, email, name, role, needsSponsorship, commuteRadiusKm } | 401 (invalid credentials)
+ * Response: 200 { id, email, name, role, needsSponsorship, commuteRadiusKm, isPublic } | 401 (invalid credentials)
  */
 export async function login(req, res) {
   const { email, password } = req.body;
@@ -89,6 +90,7 @@ export async function login(req, res) {
     role: user.role,
     needsSponsorship: user.needsSponsorship,
     commuteRadiusKm: user.commuteRadiusKm,
+    isPublic: user.isPublic,
   });
 }
 
@@ -113,7 +115,7 @@ export function logout(req, res) {
  * Returns the currently logged-in user. Requires requireAuth.
  *
  * Inputs: none.
- * Response: 200 { id, email, name, role, needsSponsorship, commuteRadiusKm } | 401 (not authenticated)
+ * Response: 200 { id, email, name, role, needsSponsorship, commuteRadiusKm, isPublic } | 401 (not authenticated)
  */
 export async function me(req, res) {
   const user = await prisma.user.findUnique({
@@ -131,5 +133,6 @@ export async function me(req, res) {
     role: user.role,
     needsSponsorship: user.needsSponsorship,
     commuteRadiusKm: user.commuteRadiusKm,
+    isPublic: user.isPublic,
   });
 }

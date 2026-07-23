@@ -170,6 +170,7 @@ describe("Home", () => {
 
     expect(await screen.findByText("Postings")).toBeInTheDocument();
     expect(screen.getByText("Candidates")).toBeInTheDocument();
+    expect(screen.getByText("Discover")).toBeInTheDocument();
     expect(screen.queryByText("Jobs")).not.toBeInTheDocument();
     expect(screen.queryByText(/jobs waiting for you/i)).not.toBeInTheDocument();
   });

@@ -268,6 +268,27 @@ describe("gamification", () => {
         .send({ dailyReachOutTarget: 0 });
       expect(res.status).toBe(400);
     });
+
+    it("updates isPublic independently", async () => {
+      const { agent } = await registerAndLogin(app);
+
+      const res = await agent
+        .patch("/api/user/settings")
+        .send({ isPublic: true });
+
+      expect(res.status).toBe(200);
+      expect(res.body.isPublic).toBe(true);
+      // untouched field keeps its existing value
+      expect(res.body.dailyQuestTarget).toBe(3);
+    });
+
+    it("rejects a non-boolean isPublic", async () => {
+      const { agent } = await registerAndLogin(app);
+      const res = await agent
+        .patch("/api/user/settings")
+        .send({ isPublic: "yes" });
+      expect(res.status).toBe(400);
+    });
   });
 
   describe("GET /api/streak", () => {

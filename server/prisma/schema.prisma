@@ -27,14 +27,15 @@ model User {
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
 
-  skills           Skill[]
-  jobListings      JobListing[]
-  applications     Application[]
-  dislikeReasons   DislikeReason[]
-  cvs              Cv[]
-  sponsorCompanies SponsorCompany[]
-  desiredLocations DesiredLocation[]
-  organization     Organization?
+  skills                    Skill[]
+  jobListings               JobListing[]
+  applications              Application[]
+  dislikeReasons            DislikeReason[]
+  cvs                       Cv[]
+  sponsorCompanies          SponsorCompany[]
+  desiredLocations          DesiredLocation[]
+  organization              Organization?
+  candidateLeadsAsCandidate CandidateLead[]
 }
 
 model Skill {
@@ -258,6 +259,7 @@ model CandidateLead {
   id                Int                @id @default(autoincrement())
   organizationId    Int
   jobPostingId      Int
+  candidateUserId   Int?
   name              String
   notes             String?
   stage             CandidateLeadStage @default(SOURCED)
@@ -265,9 +267,10 @@ model CandidateLead {
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
 
-  organization Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  jobPosting   JobPosting                @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
-  stageEvents  CandidateLeadStageEvent[]
+  organization  Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  jobPosting    JobPosting                @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
+  candidateUser User?                     @relation(fields: [candidateUserId], references: [id], onDelete: SetNull)
+  stageEvents   CandidateLeadStageEvent[]
 
   @@index([organizationId, stage])
 }

@@ -15,6 +15,7 @@ import SponsorCompanies from "./pages/SponsorCompanies.jsx";
 import Coach from "./pages/Coach.jsx";
 import Postings from "./pages/Postings.jsx";
 import EmployerBoard from "./pages/EmployerBoard.jsx";
+import Discovery from "./pages/Discovery.jsx";
 
 function App() {
   return (
@@ -116,6 +117,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <EmployerBoard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/discovery"
+            element={
+              <ProtectedRoute>
+                <Discovery />
               </ProtectedRoute>
             }
           />

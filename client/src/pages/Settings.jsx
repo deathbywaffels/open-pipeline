@@ -31,6 +31,7 @@ export default function Settings() {
   const [commuteRadiusKm, setCommuteRadiusKm] = useState(
     String(user.commuteRadiusKm),
   );
+  const [isPublic, setIsPublic] = useState(user.isPublic);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState(null);
@@ -79,6 +80,7 @@ export default function Settings() {
           dailyReachOutTarget: Number(reachOutTarget),
           needsSponsorship,
           commuteRadiusKm: Number(commuteRadiusKm),
+          isPublic,
         }),
       });
       const data = await res.json();
@@ -89,9 +91,11 @@ export default function Settings() {
       setReachOutTarget(String(data.dailyReachOutTarget));
       setNeedsSponsorship(data.needsSponsorship);
       setCommuteRadiusKm(String(data.commuteRadiusKm));
+      setIsPublic(data.isPublic);
       updateUser({
         needsSponsorship: data.needsSponsorship,
         commuteRadiusKm: data.commuteRadiusKm,
+        isPublic: data.isPublic,
       });
       setSaved(true);
     } catch (err) {
@@ -168,6 +172,21 @@ export default function Settings() {
               onChange={(e) => setCommuteRadiusKm(e.target.value)}
             />
           </div>
+
+          <label className="mt-4 flex items-center gap-2 text-sm font-semibold text-slate-600">
+            <input
+              type="checkbox"
+              checked={isPublic}
+              onChange={(e) => setIsPublic(e.target.checked)}
+              className="h-4 w-4 rounded border-2 border-slate-300 text-brand-600 focus:ring-brand-400"
+            />
+            Make my profile visible to employers
+          </label>
+          <p className="mt-1 text-xs text-slate-400">
+            Employers can see your skills, desired location(s), and streak when
+            searching for candidates — never your CV directly, and nothing is
+            visible while this is off.
+          </p>
 
           {error && (
             <p
