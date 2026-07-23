@@ -75,14 +75,16 @@ out of scope.
   mirroring the candidate Application board, postings management at
   `/postings`. Both pages guarded so only Employer accounts can reach
   them.
-- ⏳ **Phase 2 — next.** Public/private marketplace toggle enforcement +
-  candidate discovery for employers (skill/location matching, AI
-  recommendations) — this is what turns `CandidateLead`s from
-  manually-entered into sourced from real discovered Candidates.
+- ✅ **Phase 2 — done.** Public/private marketplace toggle
+  (`User.isPublic`, Candidate-side Settings toggle) + candidate discovery
+  for Employers (skill/location matching against a posting, AI
+  recommendations) — `CandidateLead`s can now be sourced from real
+  discovered Candidates (`candidateUserId`) as well as manually entered.
+- ⏳ **Phase 3 — next.** Candidate Profile visibility enforcement, CV
+  request/approve flow, "hide from these companies," work-mode/remote-
+  scope fields.
 - Freeze/cold (login-streak) + posting-freshness (weekly reconfirm,
   badge-then-30-day-hide) mechanics, both roles.
-- Candidate Profile visibility, CV request/approve flow, "hide from
-  these companies," work-mode/remote-scope fields.
 - Multi-provider AI BYOK (Anthropic/OpenAI/Gemini/Grok/Mistral) + AI
   on/off toggle.
 - Moderated feedback form (hard-block wordlist/link filter) + opt-in
